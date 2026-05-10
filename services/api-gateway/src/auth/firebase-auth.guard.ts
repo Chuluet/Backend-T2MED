@@ -26,12 +26,8 @@ export class FirebaseAuthGuard implements CanActivate {
       throw new UnauthorizedException('Token no proporcionado');
     }
     const token = authHeader.split(' ')[1];
-    try {
-      const decoded = await admin.auth().verifyIdToken(token);
-      request.user = decoded;
-      return true;
-    } catch {
-      throw new UnauthorizedException('Token inválido');
-    }
+    const decoded = await admin.auth().verifyIdToken(token, true);
+    request.user = decoded;
+    return true;
   }
 }

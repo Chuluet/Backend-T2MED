@@ -16,17 +16,19 @@ export class UserRepository {
   async findById(uid: string): Promise<User | null> {
     const doc = await this.db.collection('users').doc(uid).get();
     if (!doc.exists) return null;
-    return { uid, ...doc.data() } as User;
+    const { fcmToken, password, ...safe } = doc.data() as any;
+    return { uid, ...safe } as User;
   }
 
   async update(uid: string, data: Partial<User>): Promise<void> {
-    const clean = Object.fromEntries(
-      Object.entries(data).filter(([_, v]) => v !== undefined)
+    const { fcmToken, uid: _uid, password, ...clean } = data as any;
+    const filtered = Object.fromEntries(
+      Object.entries(clean).filter(([_, v]) => v !== undefined)
     );
-    await this.db.collection('users').doc(uid).update({
-      ...clean,
+    await this.db.collection('users').doc(uid).set({
+      ...filtered,
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-    });
+    }, { merge: true });
   }
 
   async saveFcmToken(uid: string, token: string): Promise<void> {

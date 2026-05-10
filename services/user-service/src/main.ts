@@ -4,6 +4,7 @@ dotenv.config({ path: resolve(process.cwd(), 'resources', '.env') });
 
 import { NestFactory } from '@nestjs/core';
 import { Transport, MicroserviceOptions } from '@nestjs/microservices';
+import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -17,6 +18,11 @@ async function bootstrap() {
       },
     },
   );
+  app.useGlobalPipes(new ValidationPipe({
+    whitelist: true,
+    forbidNonWhitelisted: true,
+    transform: true,
+  }));
   await app.listen();
   console.log(`User service corriendo en puerto ${process.env.PORT || 3001}`);
 }

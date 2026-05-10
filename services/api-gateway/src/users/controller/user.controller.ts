@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Patch, Body, Param, Inject, Req, UseGuards } from '@nestjs/common';
+import { Controller, Post, Get, Patch, Body, Inject, Req, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { FirebaseAuthGuard } from '../../auth/firebase-auth.guard';
 
@@ -13,10 +13,10 @@ export class UserGatewayController {
     return this.userClient.send({ cmd: 'create_user' }, body);
   }
 
-  @Get('profile/:uid')
+  @Get('profile')
   @UseGuards(FirebaseAuthGuard)
-  getProfile(@Param('uid') uid: string) {
-    return this.userClient.send({ cmd: 'get_user_profile' }, uid);
+  getProfile(@Req() req) {
+    return this.userClient.send({ cmd: 'get_user_profile' }, req.user.uid);
   }
 
   @Patch('profile')
@@ -34,5 +34,12 @@ export class UserGatewayController {
   @UseGuards(FirebaseAuthGuard)
   saveFcmToken(@Req() req, @Body('fcmToken') fcmToken: string) {
     return this.userClient.send({ cmd: 'save_fcm_token' }, { uid: req.user.uid, fcmToken });
+  }
+
+  @Post('logout')
+  @UseGuards(FirebaseAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  logout(@Req() req) {
+    return this.userClient.send({ cmd: 'logout' }, { uid: req.user.uid });
   }
 }

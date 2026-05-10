@@ -82,4 +82,9 @@ export class UserService {
   async getUserFcmToken(uid: string): Promise<string | null> {
     return this.userRepository.getFcmToken(uid);
   }
+
+  async logout(uid: string): Promise<{ message: string }> {
+    await admin.auth().revokeRefreshTokens(uid);
+    return { message: 'Sesión cerrada correctamente' };
+  }
 }
